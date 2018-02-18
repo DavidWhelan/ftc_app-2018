@@ -62,14 +62,16 @@ public class RedBackGoal extends OpMode
     ElapsedTime case_timer = new ElapsedTime();
     int case_switch = 0;
 
-    double left_distance = 18.75;
-    double center_distance = 12;
-    double right_distance= 3;
+    double left_distance = 23.75;
+    double center_distance = 16;
+    double right_distance= 7;
 
     double red;
     double blue;
 
     double distance_travel = 0;
+
+    RelicRecoveryVuMark saved_picture;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -165,14 +167,17 @@ public class RedBackGoal extends OpMode
                     if(robot.identify_position() == RelicRecoveryVuMark.LEFT)
                     {
                         distance_travel = left_distance;
+                        saved_picture = RelicRecoveryVuMark.LEFT;
                     }
                     else if(robot.identify_position() == RelicRecoveryVuMark.CENTER)
                     {
                         distance_travel = center_distance;
+                        saved_picture = RelicRecoveryVuMark.CENTER;
                     }
                     else
                     {
                         distance_travel = right_distance;
+                        saved_picture = RelicRecoveryVuMark.RIGHT;
                     }
                     case_switch++;
                 }
@@ -181,7 +186,7 @@ public class RedBackGoal extends OpMode
 
             case 5:
             {
-                if(drive.distance_drive_backward(.33, 30))
+                if(drive.distance_drive_backward(.33, 28))
                 {
                     case_switch++;
                 }
@@ -190,7 +195,7 @@ public class RedBackGoal extends OpMode
 
             case 6:
             {
-                if(drive.turn_to_heading(.33, 90, .5))
+                if(drive.turn_to_heading(.33, -90, .5))
                 {
                     case_switch++;
                 }
@@ -199,7 +204,7 @@ public class RedBackGoal extends OpMode
 
             case 7:
             {
-                if(drive.distance_drive_forward(.33, distance_travel))
+                if(drive.distance_drive_backward(.33, distance_travel))
                 {
                     case_switch++;
                 }
@@ -208,7 +213,7 @@ public class RedBackGoal extends OpMode
 
             case 8:
             {
-                if(drive.turn_to_heading(.25, 180, .5))
+                if(drive.turn_to_heading(.25, -160, .5))
                 {
                     case_switch++;
                 }
@@ -217,7 +222,7 @@ public class RedBackGoal extends OpMode
 
             case 9:
             {
-                if(drive.distance_drive_forward(.2, 7))
+                if(drive.distance_drive_forward(.33, 10.5))
                 {
                     case_timer.reset();
                     robot.eject_block();
@@ -237,13 +242,120 @@ public class RedBackGoal extends OpMode
 
             case 11:
             {
-                if(drive.distance_drive_backward(.33, 2))
+                if(saved_picture == RelicRecoveryVuMark.RIGHT || saved_picture == RelicRecoveryVuMark.CENTER)
+                {
+                    case_switch++;
+                }
+                else
+                {
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 12:
+            {
+                if(drive.distance_drive_backward(.3, 27))
                 {
                     robot.stop_ejector();
                     case_switch++;
                 }
                 break;
             }
+
+            case 13:
+            {
+                if(drive.turn_to_heading(.3, -340, 0.5))
+                {
+                    robot.gather_block();
+                    case_switch++;
+                }
+                break;
+            }
+            case 14:
+            {
+                if(drive.new_drive_forward(36))
+                {
+                    case_timer.reset();
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 15:
+            {
+                if(case_timer.time() > 2.5)
+                {
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 16:
+            {
+                if(drive.distance_drive_backward(.3, 20))
+                {
+                    robot.stop_ejector();
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 17:
+            {
+                if(drive.turn_to_heading(.3, -160, 0.5))
+                {
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 18:
+            {
+                if(drive.new_drive_forward(43))
+                {
+                    robot.eject_block();
+                    case_timer.reset();
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 19:
+            {
+                if(case_timer.time() > 1)
+                {
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 20:
+            {
+                if(drive.distance_drive_backward(.3, 4))
+                {
+                    robot.stop_ejector();
+                    case_switch++;
+                }
+                break;
+            }
+        }
+
+        if(case_switch > 16 )
+        {
+            if(robot.lift.getCurrentPosition() < 1800)
+            {
+                robot.lift.setPower(1);
+            }
+            else
+            {
+                robot.lift.setPower(0);
+            }
+        }
+
+        else
+        {
+            robot.lift.setPower(0);
         }
 
         telemetry.addData("Setpoint", drive.drive_control.setpoint);

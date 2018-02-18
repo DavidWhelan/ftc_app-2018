@@ -62,14 +62,16 @@ public class BlueBackGoal extends OpMode
     ElapsedTime case_timer = new ElapsedTime();
     int case_switch = 0;
 
-    double left_distance = 5;
-    double center_distance = 10;
-    double right_distance= 18.75;
+    double left_distance = 10;
+    double center_distance = 15;
+    double right_distance= 23.75;
 
     double distance_travel = 0;
 
     double red = 0;
     double blue= 0;
+
+    RelicRecoveryVuMark saved_picture;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -164,14 +166,17 @@ public class BlueBackGoal extends OpMode
                     if(robot.identify_position() == RelicRecoveryVuMark.LEFT)
                     {
                         distance_travel = left_distance;
+                        saved_picture = RelicRecoveryVuMark.LEFT;
                     }
                     else if(robot.identify_position() == RelicRecoveryVuMark.CENTER)
                     {
                         distance_travel = center_distance;
+                        saved_picture = RelicRecoveryVuMark.CENTER;
                     }
                     else
                     {
                         distance_travel = right_distance;
+                        saved_picture = RelicRecoveryVuMark.RIGHT;
                     }
                     case_switch++;
                 }
@@ -189,7 +194,7 @@ public class BlueBackGoal extends OpMode
 
             case 6:
             {
-                if(drive.turn_to_heading(.33, 90, .5))
+                if(drive.turn_to_heading(.33, -90, .5))
                 {
                     case_switch++;
                 }
@@ -198,7 +203,7 @@ public class BlueBackGoal extends OpMode
 
             case 7:
             {
-                if(drive.distance_drive_forward(.33, distance_travel))
+                if(drive.distance_drive_backward(.33, distance_travel))
                 {
                     case_switch++;
                 }
@@ -207,7 +212,7 @@ public class BlueBackGoal extends OpMode
 
             case 8:
             {
-                if(drive.turn_to_heading(.33, 0, .5))
+                if(drive.turn_to_heading(.33, -20, .5))
                 {
                     case_switch++;
                 }
@@ -216,7 +221,7 @@ public class BlueBackGoal extends OpMode
 
             case 9:
             {
-                if(drive.distance_drive_forward(.33, 5))
+                if(drive.distance_drive_forward(.33, 7))
                 {
                     case_timer.reset();
                     robot.eject_block();
@@ -227,34 +232,145 @@ public class BlueBackGoal extends OpMode
 
             case 10:
             {
-                if(case_timer.time() > 1.5)
+                if (case_timer.time() > 1.5)
+                {
+                    case_switch++;
+                }
+                break;
+            }
+            ////////////////////////////////////////////////////////////////////////////////////////
+            case 11:
+            {
+                if(saved_picture == RelicRecoveryVuMark.RIGHT || saved_picture == RelicRecoveryVuMark.CENTER)
+                {
+                    case_switch++;
+                }
+                else
                 {
                     case_switch++;
                 }
                 break;
             }
 
-            case 11:
+            case 12:
             {
-                if(drive.distance_drive_backward(.33, 2))
+                if(drive.distance_drive_backward(.3, 25))
                 {
                     robot.stop_ejector();
                     case_switch++;
                 }
                 break;
             }
+
+            case 13:
+            {
+                if(drive.turn_to_heading(.3, 160, 0.5))
+                {
+                    robot.gather_block();
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 14:
+            {
+                if(drive.new_drive_forward(36))
+                {
+                    case_timer.reset();
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 15:
+            {
+                if(case_timer.time() > 2.5)
+                {
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 16:
+            {
+                if(drive.distance_drive_backward(.3, 20))
+                {
+                    robot.stop_ejector();
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 17:
+            {
+                if(drive.turn_to_heading(.3, -20, 0.5))
+                {
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 18:
+            {
+                if(drive.new_drive_forward(41))
+                {
+                    robot.eject_block();
+                    case_timer.reset();
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 19:
+            {
+                if(case_timer.time() > 1)
+                {
+                    case_switch++;
+                }
+                break;
+            }
+
+            case 20:
+            {
+                if(drive.distance_drive_backward(.3, 3))
+                {
+                    robot.stop_ejector();
+                    case_switch++;
+                }
+                break;
+            }
+
+        }
+
+        if(case_switch > 16 )
+        {
+            if(robot.lift.getCurrentPosition() < 1800)
+            {
+                robot.lift.setPower(1);
+            }
+            else
+            {
+                robot.lift.setPower(0);
+            }
+        }
+
+        else
+        {
+            robot.lift.setPower(0);
         }
 
         telemetry.addData("Setpoint", drive.drive_control.setpoint);
         telemetry.addData("Motor Power", robot.back_left.getPower());
         telemetry.addData("Time", drive.drive_control.timer.time());
-        telemetry.addData("Encoder", robot.front_left.getCurrentPosition());
+        telemetry.addData("Encoder", robot.front_right.getCurrentPosition());
         telemetry.addData("Case", case_switch);
         telemetry.addData("Vumark", robot.identify_position());
 
         telemetry.addData("Lift Encoder", robot.lift.getCurrentPosition());
 
         telemetry.addData("Gyro", robot.gyro.getIntegratedZValue());
+
+        telemetry.addData("Saved vumark", saved_picture);
     }
 
     /*

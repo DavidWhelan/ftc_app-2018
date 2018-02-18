@@ -17,13 +17,24 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Teleop extends OpMode
 {
+
+
+    boolean flag = false;
+
+    boolean flag_servo = false;
+
+    double pos=0.5;
+
     RobotHardware robot = new RobotHardware();
     Drive drive = new Drive(robot);
+
+
 
     @Override
     public void init()
     {
         robot.init_hardware(hardwareMap, false);
+        drive.run_without_encoders();
     }
 
 
@@ -44,8 +55,8 @@ public class Teleop extends OpMode
     @Override
     public void loop()
     {
-        double right_X = gamepad1.right_stick_x;
-        double right_Y = gamepad1.right_stick_y;
+        double left_2_X = gamepad2.left_stick_x;
+        double left_2_Y = gamepad2.left_stick_y;
 
         double left_X = gamepad1.left_stick_x;
         double left_Y = gamepad1.left_stick_y;
@@ -57,6 +68,14 @@ public class Teleop extends OpMode
             robot.back_left.setPower(new_power(-left_Y + left_X));
             robot.front_right.setPower(new_power(-left_Y - left_X));
             robot.back_right.setPower(new_power(-left_Y - left_X));
+        }
+
+        else if(left_2_X + left_2_Y > .05 || left_2_X + left_2_Y < -.05)
+        {
+            robot.front_left.setPower(new_power_2(-left_2_Y + left_2_X));
+            robot.back_left.setPower(new_power_2(-left_2_Y + left_2_X));
+            robot.front_right.setPower(new_power_2(-left_2_Y - left_2_X));
+            robot.back_right.setPower(new_power_2(-left_2_Y - left_2_X));
         }
 
         else
@@ -112,19 +131,45 @@ public class Teleop extends OpMode
             robot.left_roller.setPower(0);
         }
 
+        if(gamepad2.dpad_up && !flag_servo)
+        {
+            flag_servo = true;
+            pos += 0.02;
+        }
+        else if(gamepad2.dpad_down && !flag_servo)
+        {
+            flag_servo = true;
+            pos -= 0.02;
+        }
+        robot.extension.setPosition(pos);
+        if(!gamepad2.dpad_down && !gamepad2.dpad_up)
+        {
+            flag_servo = false;
+        }
+
+        if(gamepad2.a)
+        {
+            flag = true;
+            //robot.belt.setPower(1);
+
+        }
+        else if(gamepad2.right_stick_y > 0.05 || gamepad2.right_stick_y < -0.05)
+        {
+            flag = false;
+            robot.belt.setPower(-gamepad2.right_stick_y);
+        }
+        else if(flag == false)
+        {
+            robot.belt.setPower(0);
+        }
         //////////////////////////////////////////////////////////////
 
-        if(gamepad2.right_bumper)
-        {
-            robot.claw.setPosition(1);
-        }
-        else if(gamepad2.left_bumper)
-        {
-            robot.claw.setPosition(0);
-        }
+        robot.arm.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
 
-        robot.tape_measure.setPower(gamepad2.left_stick_y * .75);
-        robot.tape_adjustor.setPower(gamepad2.right_stick_y);
+        if(flag)
+        {
+            robot.belt.setPower(-1+((robot.force.getVoltage()-0.5)/robot.force.getMaxVoltage()));
+        }
 
         telemetry.addData("FL", robot.front_left.getCurrentPosition());
         telemetry.addData("BL", robot.back_left.getCurrentPosition());
@@ -135,6 +180,9 @@ public class Teleop extends OpMode
         telemetry.addData("Bottom Switch", robot.bottom_lift.getState());
 
         telemetry.addData("Lift Encoder", robot.lift.getCurrentPosition());
+
+        telemetry.addData("Flag", flag);
+        telemetry.addData("Force Sensor", robot.force.getVoltage());
     }
 
 
@@ -146,11 +194,12 @@ public class Teleop extends OpMode
 
     public double new_power(double power)
     {
-        if(power == 0)
-        {
-
-        }
         return Math.pow(power, 3) + (Math.abs(power)/power) * .1;
+    }
+
+    public double new_power_2(double power)
+    {
+        return Math.pow(power, 11) + (Math.abs(power)/power) * .25;
     }
 
 }

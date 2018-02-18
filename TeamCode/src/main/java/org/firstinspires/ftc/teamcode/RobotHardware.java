@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -31,7 +32,7 @@ public class RobotHardware
             lift = null,
             left_roller = null,
             right_roller = null,
-            tape_measure = null;
+            arm = null;
 
     public DigitalChannel
             top_lift = null,
@@ -45,10 +46,10 @@ public class RobotHardware
     public Servo left_arm = null;
     public Servo left_flicker = null;
 
-    public Servo claw = null;
+    public Servo extension= null;
+    public CRServo belt = null;
 
-    public CRServo tape_adjustor;
-
+    public AnalogInput force = null;
 
     HardwareMap hwmap;
 
@@ -76,6 +77,7 @@ public class RobotHardware
 
         left_arm = hwmap.servo.get("leftArm");
         left_flicker = hwmap.servo.get("leftFlicker");
+        left_arm.setDirection(Servo.Direction.REVERSE);
 
 
         //////////////////////////////////////////////////////////////////////
@@ -86,9 +88,8 @@ public class RobotHardware
 
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        tape_measure = hwmap.dcMotor.get("tape");
+        arm = hwmap.dcMotor.get("arm");
 
-        claw = hwmap.servo.get("claw");
 
         //////////////////////////////////////////////////////////////////////
 
@@ -138,15 +139,20 @@ public class RobotHardware
         ////////////////////////////////////////////////////////////////////////
 
         gyro = hwmap.get(ModernRoboticsI2cGyro.class, "gyro");
-
-        tape_adjustor = hwmap.crservo.get("adjustor");
+        force = hwmap.analogInput.get("force");
 
         //////////////////////////////////////////////////////////////////////////
 
         left_arm_up();
         left_flicker_left();
 
-        claw.setPosition(0);
+        belt = hwmap.crservo.get("belt");
+        extension = hwmap.servo.get("ext");
+
+        belt.setPower(0);
+        extension.setPosition(0.5);
+
+
 
         //////////////////////////////////////////////////////////////////////////
 
@@ -220,7 +226,7 @@ public class RobotHardware
 
     public void left_arm_down()
     {
-        left_arm.setPosition(.97);
+        left_arm.setPosition(1);
     }
 
     /////////////////////////////////////////////////////////////////////////////////

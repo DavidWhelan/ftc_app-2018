@@ -298,17 +298,18 @@ public class BlueFrontGoal extends OpMode
 
             case 17:
             {
-                if(drive.distance_drive_backward(.33, 1))
+                if(drive.distance_drive_backward(.33, 3))
                 {
                     robot.stop_ejector();
                     case_switch++;
                 }
                 break;
             }
+
         }
-        if(case_switch > 13)
+        if(case_switch > 13 )
         {
-            if(robot.lift.getCurrentPosition() < 1700)
+            if(robot.lift.getCurrentPosition() < 1800)
             {
                 robot.lift.setPower(1);
             }
@@ -317,6 +318,7 @@ public class BlueFrontGoal extends OpMode
                 robot.lift.setPower(0);
             }
         }
+
         else
         {
             robot.lift.setPower(0);

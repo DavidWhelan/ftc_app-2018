@@ -305,7 +305,7 @@ public class RedFrontGoal extends OpMode
         }
         if(case_switch > 13)
         {
-            if(robot.lift.getCurrentPosition() < 1700)
+            if(robot.lift.getCurrentPosition() < 1800)
             {
                 robot.lift.setPower(1);
             }

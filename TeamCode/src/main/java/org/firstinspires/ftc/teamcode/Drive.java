@@ -20,7 +20,7 @@ public class Drive
 
     double absolute_drive;
 
-    private final double ticks_per_revolution = 1100;
+    private final double ticks_per_revolution = 1000;
     private final double drive_gear_teeth = 24;
     private final double wheel_gear_teeth = 32;
 
@@ -237,6 +237,15 @@ public class Drive
         robot.front_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.back_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
+    public void run_without_encoders()
+    {
+        robot.front_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.back_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.front_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.back_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
     public boolean score(String color, double red, double blue)
     {
         if(color.equals("blue"))
