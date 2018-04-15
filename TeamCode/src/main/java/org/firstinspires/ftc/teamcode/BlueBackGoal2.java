@@ -30,13 +30,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
 /**
@@ -53,9 +49,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="BlueBackGoal", group="Blue")
-@Disabled
-public class BlueBackGoal extends OpMode
+@Autonomous(name="BlueBackGoal2", group="Blue")
+//@Disabled
+public class BlueBackGoal2 extends OpMode
 {
     // Declare OpMode members.
     RobotHardware robot;
@@ -63,9 +59,9 @@ public class BlueBackGoal extends OpMode
     ElapsedTime case_timer = new ElapsedTime();
     int case_switch = 0;
 
-    double left_distance = 10;
-    double center_distance = 15;
-    double right_distance= 23.75;
+    double left_distance = 5.5;
+    double center_distance = 14.5;
+    double right_distance= 24.75;
 
     double distance_travel = 0;
 
@@ -93,6 +89,8 @@ public class BlueBackGoal extends OpMode
     {
         telemetry.addData("Motor Power", robot.back_left.getPower());
         telemetry.addData("Boolean", drive.pid_reset);
+        telemetry.addData("Gyro", robot.gyro.getIntegratedZValue());
+
     }
 
     /*
@@ -136,7 +134,7 @@ public class BlueBackGoal extends OpMode
 
             case 2:
             {
-                if(case_timer.time() > .5)
+                if(case_timer.time() > 1)
                 {
                     drive.score("blue", red, blue);
                     case_timer.reset();
@@ -186,7 +184,7 @@ public class BlueBackGoal extends OpMode
 
             case 5:
             {
-                if(drive.distance_drive_forward(.33, 24))
+                if(drive.new_drive_forward2(24))
                 {
                     case_switch++;
                 }
@@ -204,7 +202,7 @@ public class BlueBackGoal extends OpMode
 
             case 7:
             {
-                if(drive.distance_drive_backward(.33, distance_travel))
+                if(drive.new_drive_backward2( distance_travel))
                 {
                     case_switch++;
                 }
@@ -222,7 +220,7 @@ public class BlueBackGoal extends OpMode
 
             case 9:
             {
-                if(drive.distance_drive_forward(.33, 7))
+                if(drive.new_drive_forward2(7))
                 {
                     case_timer.reset();
                     robot.eject_block();
@@ -255,7 +253,7 @@ public class BlueBackGoal extends OpMode
 
             case 12:
             {
-                if(drive.distance_drive_backward(.3, 25))
+                if(drive.new_drive_backward2(25))
                 {
                     robot.stop_ejector();
                     case_switch++;
@@ -275,7 +273,7 @@ public class BlueBackGoal extends OpMode
 
             case 14:
             {
-                if(drive.new_drive_forward(36))
+                if(drive.new_drive_forward2(36))
                 {
                     case_timer.reset();
                     case_switch++;
@@ -285,7 +283,7 @@ public class BlueBackGoal extends OpMode
 
             case 15:
             {
-                if(case_timer.time() > 2.5)
+                if(case_timer.time() > 1.5)
                 {
                     case_switch++;
                 }
@@ -294,7 +292,7 @@ public class BlueBackGoal extends OpMode
 
             case 16:
             {
-                if(drive.distance_drive_backward(.3, 20))
+                if(drive.new_drive_backward2(20))
                 {
                     robot.stop_ejector();
                     case_switch++;
@@ -313,7 +311,7 @@ public class BlueBackGoal extends OpMode
 
             case 18:
             {
-                if(drive.new_drive_forward(41))
+                if(drive.new_drive_forward2(41))
                 {
                     robot.eject_block();
                     case_timer.reset();
@@ -333,7 +331,7 @@ public class BlueBackGoal extends OpMode
 
             case 20:
             {
-                if(drive.distance_drive_backward(.3, 3))
+                if(drive.new_drive_backward2(3))
                 {
                     robot.stop_ejector();
                     case_switch++;

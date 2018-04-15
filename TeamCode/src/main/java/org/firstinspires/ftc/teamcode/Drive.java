@@ -26,6 +26,9 @@ public class Drive
 
     private boolean drive_reset = false;
     private boolean turn_reset = false;
+
+    private double saved_radius= 0;
+
     public boolean pid_reset = false;
 
     String output = "unchanged";
@@ -43,6 +46,8 @@ public class Drive
         robot.front_right.setPower(0);
         robot.back_right.setPower(0);
         robot.back_left.setPower(0);
+        robot.extension.setPower(0);
+        robot.belt.setPower(0);
     }
 
     public boolean turn_to_heading(double power, double heading, double error)
@@ -353,5 +358,123 @@ public class Drive
     public double new_power(double drive_proportion)
     {
         return Math.pow(Math.E, (-Math.pow(drive_proportion-0.5,2))/(2*Math.pow(.25, 2)));
+    }
+
+    public boolean new_drive_forward2(double distance)
+    {
+        if(!drive_reset)
+        {
+            if(reset_encoders())
+            {
+                run_with_encoders();
+                drive_reset = true;
+            }
+
+            else
+            {
+                return false;
+            }
+        }
+
+        double wheel_rotation_per_turn = drive_gear_teeth/wheel_gear_teeth;
+
+        double distance_per_turn = (Math.PI * 6) * wheel_rotation_per_turn;
+
+        double total_wheel_turns = distance/distance_per_turn;
+
+        double total_number_encoder_ticks = ticks_per_revolution * total_wheel_turns;
+
+        double new_power = new_power2(robot.front_right.getCurrentPosition()/total_number_encoder_ticks);
+
+        boolean correct_distance = robot.front_right.getCurrentPosition() >= total_number_encoder_ticks;
+
+        if(drive_straight_forward(new_power, 0, correct_distance))
+        {
+            drive_reset = false;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean new_drive_backward2(double distance)
+    {
+        distance = -distance;
+        if(!drive_reset)
+        {
+            if(reset_encoders())
+            {
+                run_with_encoders();
+                drive_reset = true;
+            }
+
+            else
+            {
+                return false;
+            }
+        }
+
+        double wheel_rotation_per_turn = drive_gear_teeth/wheel_gear_teeth;
+
+        double distance_per_turn = (Math.PI * 6) * wheel_rotation_per_turn;
+
+        double total_wheel_turns = distance/distance_per_turn;
+
+        double total_number_encoder_ticks = -ticks_per_revolution * total_wheel_turns;
+
+        double new_power = new_power2(Math.abs(robot.front_right.getCurrentPosition()/total_number_encoder_ticks));
+
+        boolean correct_distance = robot.front_right.getCurrentPosition() <= -total_number_encoder_ticks;
+
+        if(drive_straight_backward(new_power, 0, correct_distance))
+        {
+            drive_reset = false;
+            return true;
+        }
+        return false;
+
+    }
+
+    public double new_power2(double drive_proportion)
+    {
+        return (0.75*Math.pow(Math.E, (-Math.pow(drive_proportion-0.4,2))/(2*Math.pow(.4, 2)))) - 0.2;
+    }
+
+    public boolean balance(double power, double x, double y)
+    {
+        double[] coordinate = Polar_Cartesian.polar(x, y);
+
+        if(!pid_reset)
+        {
+            saved_radius = coordinate[0];
+            drive_control.reset_PID();
+            pid_reset = true;
+        }
+
+        drive_control.setpoint = coordinate[1];
+
+        drive_control.set_tunings(0.028, 0.03, 0.015);
+
+        double angle  = robot.gyro.getIntegratedZValue() * (Math.PI / 180); //TODO Modify the heading
+
+        double to_change = drive_control.calculate(angle);
+
+        power = power * (coordinate[0]/saved_radius);
+
+        robot.front_left.setPower(power - (power * to_change));
+        robot.back_left.setPower(power - (power * to_change));
+
+        robot.front_right.setPower(power + (power * to_change));
+        robot.back_right.setPower(power + (power * to_change));
+
+
+        boolean stop = Math.abs(x) < 4 && Math.abs(y) < 4;
+
+        if(stop)
+        {
+            pid_reset = false;
+            saved_radius=0;
+            stop();
+        }
+        return stop;
     }
 }

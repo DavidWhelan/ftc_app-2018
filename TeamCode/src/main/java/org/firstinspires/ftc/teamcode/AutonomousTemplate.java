@@ -56,6 +56,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
  */
 
 @TeleOp(name="Template", group="Template")
+@Disabled
 public class AutonomousTemplate extends OpMode
 {
     // Declare OpMode members.

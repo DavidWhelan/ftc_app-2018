@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -9,11 +11,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
@@ -36,7 +41,8 @@ public class RobotHardware
 
     public DigitalChannel
             top_lift = null,
-            bottom_lift = null;
+            bottom_lift = null,
+            block_bottom;
 
     ModernRoboticsI2cGyro gyro = null;
 
@@ -45,11 +51,18 @@ public class RobotHardware
 
     public Servo left_arm = null;
     public Servo left_flicker = null;
+    public CRServo wrist = null;
+    public Servo bottom_block;
 
-    public Servo extension= null;
+
+    public CRServo extension= null;
     public CRServo belt = null;
+    public CRServo lift_belt = null;
+    public CRServo lift_belt2 = null;
 
     public AnalogInput force = null;
+
+    //public BNO055IMU tilt_sensor;
 
     HardwareMap hwmap;
 
@@ -121,24 +134,37 @@ public class RobotHardware
         back_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
+        bottom_block = hwmap.servo.get("sbb");
+
+        wrist = hwmap.crservo.get("wrist");
+
+        wrist.setPower(0);
+
+        bottom_block.setPosition(0);
 
         ////////////////////////////////////////////////////////////////////////
 
         right_roller = hwmap.dcMotor.get("rightRoller");
         left_roller = hwmap.dcMotor.get("leftRoller");
 
-        right_roller.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_roller.setDirection(DcMotorSimple.Direction.REVERSE);
 
         ////////////////////////////////////////////////////////////////////////
         top_lift = hwmap.get(DigitalChannel.class, "topLift");
         bottom_lift = hwmap.get(DigitalChannel.class, "bottomLift");
 
+        block_bottom = hwmap.get(DigitalChannel.class, "bb");
+
         top_lift.setMode(DigitalChannel.Mode.INPUT);
         bottom_lift.setMode(DigitalChannel.Mode.INPUT);
+
+        block_bottom.setMode(DigitalChannel.Mode.INPUT);
+
 
         ////////////////////////////////////////////////////////////////////////
 
         gyro = hwmap.get(ModernRoboticsI2cGyro.class, "gyro");
+        gyro.calibrate();
         force = hwmap.analogInput.get("force");
 
         //////////////////////////////////////////////////////////////////////////
@@ -147,19 +173,37 @@ public class RobotHardware
         left_flicker_left();
 
         belt = hwmap.crservo.get("belt");
-        extension = hwmap.servo.get("ext");
+        extension = hwmap.crservo.get("ext");
+        lift_belt = hwmap.crservo.get("liftBelt");
+        lift_belt2 = hwmap.crservo.get("liftBelt2");
+        lift_belt2.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        lift_belt.setPower(0);
         belt.setPower(0);
-        extension.setPosition(0.5);
-
-
+        extension.setPower(0);
 
         //////////////////////////////////////////////////////////////////////////
+        /*
+        BNO055IMU.Parameters tlt_parameters = new BNO055IMU.Parameters();
+        tlt_parameters.mode                = BNO055IMU.SensorMode.IMU;
+        tlt_parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        tlt_parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        tlt_parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        tlt_parameters.loggingEnabled      = true;
+        tlt_parameters.loggingTag          = "IMU";
+        tlt_parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        gyro.calibrate();
+        tilt_sensor = hwmap.get(BNO055IMU.class, "tilt");
+
+        tilt_sensor.initialize(tlt_parameters);
+
+        tilt_sensor.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        */
+
 
         if(camera)
         {
+
             int cameraMonitorViewId = hwmap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwmap.appContext.getPackageName());
             VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
@@ -174,7 +218,6 @@ public class RobotHardware
 
             relicTrackables.activate();
         }
-
     }
 
 
@@ -226,7 +269,7 @@ public class RobotHardware
 
     public void left_arm_down()
     {
-        left_arm.setPosition(1);
+        left_arm.setPosition(0.85);
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +282,7 @@ public class RobotHardware
     /////////////////////////////////////////////////////////////////////////////////
     public void read_left()
     {
-        left_arm.setPosition(.93);
+        left_arm.setPosition(.85);
         left_flicker_center();
     }
 
